@@ -32,7 +32,6 @@ def nanny():
     data = request.get_json()
 
     for t, p in app.config.get('NANNY_PEEK', []):
-        pystache.render()
         to_peek = pystache.render(template, data)
         m = re.match(to_peek)
         if not m:
