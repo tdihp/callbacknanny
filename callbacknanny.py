@@ -75,8 +75,8 @@ def main():
     if not args.template is None:
         app.config['NANNY_TEMPLATE'] = args.template.read()
 
-    if peek:
-        app.config['NANNY_PEEK'] = peek
+    if args.peek:
+        app.config['NANNY_PEEK'] = args.peek
 
     app.run(host=args.host, port=args.port, debug=args.debug)
 
