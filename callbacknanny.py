@@ -3,6 +3,7 @@
 import logging
 import subprocess
 import os
+import re
 
 from flask import Flask, request, abort, jsonify
 import pystache
@@ -28,14 +29,26 @@ def nanny():
 
     ALWAYS returns true, no questions asked
     """
-    template = app.config['NANNY_TEMPLATE']
-
     if request.json is None:
         logging.info('Nanny got non-json content, ignoring...')
         abort(400)
 
+    data = request.json
+
+    for t, p in app.config.get('NANNY_PEEK', []):
+        pystache.render()
+        to_peek = pystache.render(template, data)
+        m = re.match(to_peek)
+        if not m:
+            logging.info('unable to match re %s with %s (from template %s)', p, to_peek, t)
+            abort(400)
+        data.update(m.groupdict())
+
+    template = app.config['NANNY_TEMPLATE']
+
     script = pystache.render(template, request.json)
-    if not script:
+
+    if not script.strip():
         logging.info('Nanny got empty script, ignoring...')
         abort(400)
 
@@ -53,9 +66,18 @@ def main():
                         help='toggle flask debug')
     parser.add_argument('-t', '--template', type=argparse.FileType('r'),
                         help='the mustache template to use')
+    parser.add_argument('--peek', nargs=2, action='append',
+                        help="peek into a template using regular expression. "
+                             "All peeks must succeed to run the main template. "
+                             "e.g. --peek foo ^abc$"
+                        )
     args = parser.parse_args()
     if not args.template is None:
         app.config['NANNY_TEMPLATE'] = args.template.read()
+
+    if peek:
+        app.config['NANNY_PEEK'] = peek
+
     app.run(host=args.host, port=args.port, debug=args.debug)
 
 
