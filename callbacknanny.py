@@ -33,7 +33,7 @@ def nanny():
 
     for t, p in app.config.get('NANNY_PEEK', []):
         to_peek = pystache.render(t, data)
-        m = re.match(to_peek)
+        m = re.match(p, to_peek)
         if not m:
             logging.info('unable to match re %s with %s (from template %s)', p, to_peek, t)
             abort(400)
