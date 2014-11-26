@@ -29,11 +29,7 @@ def nanny():
 
     ALWAYS returns true, no questions asked
     """
-    if request.json is None:
-        logging.info('Nanny got non-json content, ignoring...')
-        abort(400)
-
-    data = request.json
+    data = request.get_json()
 
     for t, p in app.config.get('NANNY_PEEK', []):
         pystache.render()
@@ -61,7 +57,7 @@ def main():
     import argparse
     parser = argparse.ArgumentParser(description='callbacknanny cmd tool')
     parser.add_argument('--host', help='host ip')
-    parser.add_argument('--port', help='host port')
+    parser.add_argument('--port', type=int, help='host port')
     parser.add_argument('--debug', action='store_true', default=False,
                         help='toggle flask debug')
     parser.add_argument('-t', '--template', type=argparse.FileType('r'),
