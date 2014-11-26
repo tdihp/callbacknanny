@@ -32,7 +32,7 @@ def nanny():
     data = request.get_json()
 
     for t, p in app.config.get('NANNY_PEEK', []):
-        to_peek = pystache.render(template, data)
+        to_peek = pystache.render(t, data)
         m = re.match(to_peek)
         if not m:
             logging.info('unable to match re %s with %s (from template %s)', p, to_peek, t)
@@ -72,6 +72,9 @@ def main():
 
     if args.peek:
         app.config['NANNY_PEEK'] = args.peek
+
+    if args.debug:
+        logging.basicConfig(level=logging.DEBUG)
 
     app.run(host=args.host, port=args.port, debug=args.debug)
 
